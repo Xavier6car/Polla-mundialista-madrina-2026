@@ -363,6 +363,7 @@
   @keyframes rotateBg{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
   .login-card>*{position:relative;z-index:1;}
   .login-trophy{filter:drop-shadow(0 0 15px var(--gold-glow));}
+  .login-trophy img{width:140px;max-width:60%;height:auto;display:block;margin:0 auto;}
   .login-card h1{font-size:2rem;}
 
   /* Inputs y botones */
@@ -442,7 +443,7 @@
 <main>
   <div id="screen-login" class="section-hidden">
     <div class="login-card">
-      <div class="login-trophy">🏆</div>
+      <div class="login-trophy"><img src="logo.png" alt="Mundial Madrina 2026" onerror="this.replaceWith('🏆')"></div>
       <h1>MUNDIAL MADRINA 2026</h1>
       <p>Ingresa o regístrate para hacer tus pronósticos</p>
       <div class="db-status" id="db-status"></div>
@@ -451,7 +452,7 @@
       <div id="form-login">
         <div class="form-group">
           <label>Nombre de usuario</label>
-          <input type="text" id="in-username" placeholder="tu_nombre" autocomplete="off">
+          <input type="text" id="in-username" placeholder="Usuario" autocomplete="off">
         </div>
         <div class="form-group">
           <label>Contraseña</label>
