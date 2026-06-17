@@ -275,7 +275,7 @@
     box-shadow:0 4px 20px rgba(0,0,0,0.4);
   }
   .header-inner{height:64px;}
-  #screen-login{min-height:calc(100vh - 64px);}
+  #screen-login{min-height:calc(100vh - 64px);align-items:flex-start;padding-top:1.5rem;}
   .logo{
     background:linear-gradient(135deg,#fff 0%,var(--gold) 100%);
     -webkit-background-clip:text;background-clip:text;
@@ -950,6 +950,11 @@ function logout(){
   if(!confirm('¿Cerrar sesión?'))return;
   closeMenu();
   currentUser=null;
+  // Limpia el formulario de login al salir y restablece el botón
+  document.getElementById('in-username').value='';
+  document.getElementById('in-password').value='';
+  const lb=document.getElementById('btn-login'); lb.disabled=false; lb.textContent='Ingresar';
+  ['login-error','login-success'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
   document.getElementById('user-pill').style.display='none';
   document.getElementById('nav-tabs').style.display='none';
   document.getElementById('hamburger').style.display='none';
