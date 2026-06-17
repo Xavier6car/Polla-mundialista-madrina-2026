@@ -1031,7 +1031,7 @@ async function renderUpcoming(){
   let html='';
   upcoming.forEach(x=>{
     if(!userPreds[x.m.id]){
-      html+='<div style="font-size:0.72rem;color:var(--red);font-weight:700;margin:4px 0 -4px">⚠️ SIN PRONÓSTICO</div>';
+      html+=`<div id="warn_${x.m.id}" style="font-size:0.72rem;color:var(--red);font-weight:700;margin:4px 0 -4px">⚠️ SIN PRONÓSTICO</div>`;
     }
     html+=buildMatchCard(x.m,userPreds,results);
   });
@@ -1057,6 +1057,10 @@ function markCardSaved(cardId, text){
   badge.style.transition='transform 0.2s';
   badge.style.transform='scale(1.25)';
   setTimeout(()=>{ badge.style.transform='scale(1)'; }, 180);
+  // Quita de inmediato el aviso "⚠️ SIN PRONÓSTICO" de la sección Por Vencer
+  const matchId=cardId.replace(/^k?card_/,'');
+  const warn=document.getElementById('warn_'+matchId);
+  if(warn) warn.remove();
 }
 
 async function savePred(matchId){
