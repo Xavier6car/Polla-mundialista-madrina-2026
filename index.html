@@ -178,7 +178,7 @@
     .logo{font-size:1rem;letter-spacing:0.5px;}
     .nav-tabs{display:none!important;}
     .user-pill{display:none!important;}
-    .hamburger{display:flex!important;}
+    body.logged-in .hamburger{display:flex!important;}
     main{padding:1rem 0.8rem;}
     .match-card{padding:0.9rem;}
     .team-name{font-size:0.82rem;}
@@ -388,7 +388,7 @@
   @media(max-width:1024px){
     .nav-tabs{display:none!important;}
     .user-pill{display:none!important;}
-    .hamburger{display:flex!important;}
+    body.logged-in .hamburger{display:flex!important;}
   }
   @media(min-width:601px) and (max-width:1024px){
     .logo{font-size:1.25rem;}
@@ -940,6 +940,7 @@ function afterLogin(){
   document.getElementById('user-pill').style.display='flex';
   document.getElementById('nav-tabs').style.display='flex';
   document.getElementById('hamburger').style.display='flex';
+  document.body.classList.add('logged-in');
   document.getElementById('user-avatar').textContent=currentUser.name[0].toUpperCase();
   document.getElementById('user-display').innerHTML=currentUser.name+(currentUser.isAdmin?' <span class="admin-badge">ADMIN</span>':'');
   showScreen('grupos');
@@ -952,6 +953,7 @@ function logout(){
   document.getElementById('user-pill').style.display='none';
   document.getElementById('nav-tabs').style.display='none';
   document.getElementById('hamburger').style.display='none';
+  document.body.classList.remove('logged-in');
   ['grupos','porvencer','eliminatorias','especiales','mispron','ranking','reglas'].forEach(s=>document.getElementById(`screen-${s}`)?.classList.add('section-hidden'));
   document.getElementById('screen-login').classList.remove('section-hidden');
 }
