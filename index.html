@@ -256,8 +256,11 @@
       radial-gradient(circle at 15% 10%, rgba(20,60,30,0.4) 0%, transparent 40%),
       radial-gradient(circle at 85% 90%, rgba(30,50,20,0.3) 0%, transparent 40%);
     background-attachment:fixed;
-    overflow-x:hidden;
+    overflow-x:clip;
+    max-width:100%;
   }
+  /* Evita el desbordamiento horizontal en móvil (sin romper el header fijo) */
+  html{ overflow-x:clip; max-width:100%; }
   ::-webkit-scrollbar{width:6px;}
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:10px;}
@@ -1001,7 +1004,7 @@ async function renderGroup(groupKey){
   container.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando partidos...</div>';
   const preds=await getPreds();const results=await getResults();
   const userPreds=preds[currentUser?.username]||{};
-  let html=`<div style="font-family:'Oswald',sans-serif;font-size:1rem;color:var(--gray);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">${group.name} &nbsp;·&nbsp; <span style="font-size:0.8rem">🎯 Exacto = <b style="color:var(--gold)">5 pts</b> &nbsp; ✅ Correcto = <b style="color:var(--green)">2 pts</b></span></div>`;
+  let html=`<div style="font-family:'Oswald',sans-serif;font-size:1rem;color:var(--gray);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">${group.name} <span style="font-size:0.8rem;white-space:nowrap;margin-left:6px">🎯 Exacto = <b style="color:var(--gold)">5 pts</b></span> <span style="font-size:0.8rem;white-space:nowrap;margin-left:10px">✅ Correcto = <b style="color:var(--green)">2 pts</b></span></div>`;
   [1,2,3].forEach(j=>{
     const jm=group.matches.filter(m=>m.j===j);
     if(jm.length > 0) {
