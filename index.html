@@ -705,6 +705,19 @@ let currentUser=null;
 let currentGroup='A';
 let currentScreen='grupos';
 
+// ── SESIÓN PERSISTENTE (se mantiene al recargar; caduca tras inactividad) ──
+const SESSION_MINUTES = 720; // 12 horas. Cambia este número para otra duración (ej. 60 = 1 hora).
+let sessionRestoreTried = false;
+function saveSession(){ try{ if(currentUser) localStorage.setItem('pollaSession', JSON.stringify({u:currentUser.username, exp:Date.now()+SESSION_MINUTES*60000})); }catch(e){} }
+function clearSession(){ try{ localStorage.removeItem('pollaSession'); }catch(e){} }
+function readSession(){ try{ const s=JSON.parse(localStorage.getItem('pollaSession')||'null'); if(s&&s.u&&s.exp&&Date.now()<s.exp) return s; }catch(e){} return null; }
+async function tryRestoreSession(){
+  const s=readSession();
+  if(!s){ clearSession(); return false; }
+  try{ const users=await getUsers(); if(!users[s.u]){ clearSession(); return false; } currentUser={username:s.u, ...users[s.u]}; afterLogin(); return true; }
+  catch(e){ return false; }
+}
+
 function refreshActive(){ if(currentScreen==='porvencer'){renderUpcoming();} else {renderGroup(currentGroup);} }
 
 // ── SISTEMA DE ARRANQUE SEGURO ──
@@ -718,6 +731,7 @@ function whenFirebaseReady(cb){
 
 function checkAppReady() {
   if (isFirebaseReady && isTimeReady) {
+    if(!currentUser && !sessionRestoreTried) return; // espera a intentar restaurar la sesión guardada
     document.getElementById('loading-overlay').style.display = 'none';
     if(!currentUser) document.getElementById('screen-login').classList.remove('section-hidden');
   }
@@ -810,6 +824,11 @@ whenFirebaseReady(async () => {
   document.getElementById('in-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
   document.getElementById('in-username').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
   buildGroupTabs();
+
+  // Restaurar sesión guardada (si no ha caducado)
+  if(!currentUser && readSession()){ await tryRestoreSession(); }
+  sessionRestoreTried = true;
+  checkAppReady();
 
   setInterval(()=>{
     if(!currentUser || !isTimeReady) return;
@@ -936,6 +955,7 @@ async function doRegister(){
 window.doRegister = doRegister;
 
 function afterLogin(){
+  saveSession();
   document.getElementById('screen-login').classList.add('section-hidden');
   document.getElementById('user-pill').style.display='flex';
   document.getElementById('nav-tabs').style.display='flex';
@@ -950,6 +970,7 @@ function logout(){
   if(!confirm('¿Cerrar sesión?'))return;
   closeMenu();
   currentUser=null;
+  clearSession();
   // Limpia el formulario de login al salir y restablece el botón
   document.getElementById('in-username').value='';
   document.getElementById('in-password').value='';
