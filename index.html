@@ -157,6 +157,34 @@
   .reglas-card ul{margin:0.3rem 0 0.6rem;padding-left:1.2rem;}
   .reglas-card li{color:#c8d4cc;font-size:0.92rem;margin-bottom:0.5rem;}
   .knockout-info h3{font-family:'Oswald',sans-serif;font-size:1.2rem;color:var(--gold);margin-bottom:0.5rem;}
+  .rank-name.clickable{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(240,192,64,0.35);text-underline-offset:3px;transition:color 0.15s;}
+  .rank-name.clickable:hover{color:var(--gold);}
+  .pp-overlay{position:fixed;inset:0;background:rgba(3,8,5,0.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:10000;display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto;}
+  .pp-overlay.show{display:flex;}
+  .pp-modal{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:16px;width:100%;max-width:520px;margin:auto;box-shadow:0 24px 60px rgba(0,0,0,0.6);animation:ppIn 0.22s ease;}
+  @keyframes ppIn{from{opacity:0;transform:translateY(16px) scale(0.98);}to{opacity:1;transform:none;}}
+  .pp-head{position:sticky;top:0;background:linear-gradient(180deg,var(--card-bg) 80%,transparent);border-bottom:1px solid var(--border);border-radius:16px 16px 0 0;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2;}
+  .pp-head h3{font-family:'Oswald',sans-serif;font-size:1.25rem;color:var(--gold);line-height:1.1;}
+  .pp-head .pp-sub{font-size:0.74rem;color:var(--gray);font-weight:500;margin-top:2px;}
+  .pp-close{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--gray);font-size:1.2rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .pp-close:hover{color:#fff;border-color:var(--red);}
+  .pp-body{padding:14px 16px 20px;}
+  .pp-section-title{font-family:'Oswald',sans-serif;font-size:0.82rem;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin:14px 0 8px;}
+  .pp-section-title:first-child{margin-top:0;}
+  .pp-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:7px;}
+  .pp-row .pp-meta{font-size:0.66rem;color:var(--gray);min-width:62px;line-height:1.25;}
+  .pp-row .flag{width:22px;height:auto;border-radius:2px;}
+  .pp-team{font-size:0.84rem;color:#dfe8e1;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pp-team.r{text-align:right;}
+  .pp-score{font-family:'Oswald',sans-serif;font-size:1.05rem;color:var(--gold);font-weight:600;padding:0 6px;white-space:nowrap;}
+  .pp-real{font-size:0.66rem;color:var(--gray);margin-left:4px;white-space:nowrap;}
+  .pp-pts{flex-shrink:0;font-size:0.66rem;font-weight:800;padding:2px 7px;border-radius:5px;}
+  .pp-pts.p5{background:rgba(46,204,113,0.18);color:#2ecc71;}
+  .pp-pts.p2{background:rgba(240,192,64,0.18);color:var(--gold);}
+  .pp-pts.p0{background:rgba(255,255,255,0.06);color:var(--gray);}
+  .pp-empty{color:var(--gray);text-align:center;padding:2rem 1rem;font-size:0.88rem;}
+  .pp-esp-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:7px;font-size:0.84rem;color:#dfe8e1;}
+  .pp-esp-row .pp-esp-label{color:var(--gray);font-size:0.78rem;flex:1;}
   #toast{position:fixed;bottom:24px;right:24px;background:var(--card-bg);border:1px solid var(--green);color:var(--green);border-radius:10px;padding:12px 18px;font-size:0.9rem;font-weight:600;z-index:9999;transform:translateY(60px);opacity:0;transition:all 0.3s;pointer-events:none;}
   #toast.show{transform:translateY(0);opacity:1;}
   #toast.error{border-color:var(--red);color:var(--red);}
@@ -565,6 +593,18 @@
     </div>
   </div>
 </main>
+<div class="pp-overlay" id="pp-overlay" onclick="if(event.target===this)closePlayerPreds()">
+  <div class="pp-modal" role="dialog" aria-modal="true">
+    <div class="pp-head">
+      <div>
+        <h3 id="pp-title">Pronósticos</h3>
+        <div class="pp-sub">Solo se muestran los pronósticos ya cerrados</div>
+      </div>
+      <button class="pp-close" onclick="closePlayerPreds()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="pp-body" id="pp-body"></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -1243,9 +1283,91 @@ async function renderRanking(){
     const pi=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':'';
     const ic=s.username===currentUser?.username;
     const star=s.espPts>0?` <span style="font-size:0.66rem;color:var(--gold);font-weight:700;white-space:nowrap" title="Puntos por pronósticos especiales">⭐${s.espPts}</span>`:'';
-    return`<div class="rank-row" style="${ic?'background:rgba(240,192,64,0.07)':''}"><div class="rank-pos ${pc}">${pi||pos}</div><div class="rank-name">${s.name}${star}</div><div class="rank-pts">${s.total}</div><div class="rank-exact">${s.exact}</div><div class="rank-correct">${s.correct}</div></div>`;
+    return`<div class="rank-row" style="${ic?'background:rgba(240,192,64,0.07)':''}"><div class="rank-pos ${pc}">${pi||pos}</div><div class="rank-name clickable" onclick="openPlayerPreds('${s.username}')">${s.name}${star}</div><div class="rank-pts">${s.total}</div><div class="rank-exact">${s.exact}</div><div class="rank-correct">${s.correct}</div></div>`;
   }).join('');
 }
+
+// ── DETALLE DE PRONÓSTICOS POR JUGADOR (solo cerrados) ──
+function closePlayerPreds(){
+  const ov=document.getElementById('pp-overlay');
+  ov.classList.remove('show');
+  document.body.style.overflow='';
+}
+
+function ppRow(match,pred,result,isKnockout){
+  const hf=flagImg(match.home),af=flagImg(match.away);
+  const dateTxt=isKnockout?`🏆 ${match.round||''}`:`📅 ${formatDate(match.date)}`;
+  const timeTxt=match.time_ec?`${match.time_ec}h`:'';
+  const pts=isKnockout?calcKnockoutPoints(pred,result):calcPoints(pred,result);
+  const ptsCls=pts>=5?'p5':pts>=2?'p2':'p0';
+  const ptsBadge=result?`<span class="pp-pts ${ptsCls}">${pts} pt${pts===1?'':'s'}</span>`:'';
+  let realTxt='';
+  if(result){
+    realTxt=`<span class="pp-real">(${result.home}–${result.away}${result.def?` · ${result.def}`:''})</span>`;
+  }
+  return`<div class="pp-row"><div class="pp-meta">${dateTxt}<br>${timeTxt}</div>${hf}<span class="pp-team r">${match.home}</span><span class="pp-score">${pred.home} – ${pred.away}</span><span class="pp-team">${match.away}</span>${af}${realTxt}${ptsBadge}</div>`;
+}
+
+async function openPlayerPreds(username){
+  const ov=document.getElementById('pp-overlay');
+  const body=document.getElementById('pp-body');
+  const titleEl=document.getElementById('pp-title');
+  body.innerHTML='<div class="pp-empty">Cargando pronósticos...</div>';
+  ov.classList.add('show');
+  document.body.style.overflow='hidden';
+
+  const users=await getUsers();
+  const u=users[username];
+  titleEl.textContent=u?u.name:'Pronósticos';
+
+  const preds=await getPreds();const results=await getResults();
+  const kpreds=await getKnockoutPreds();const kresults=await getKnockoutResults();const knockout=await getKnockout();
+  const especiales=await getEspeciales();
+
+  const up=preds[username]||{};
+  const ukp=kpreds[username]||{};
+
+  // Partidos de grupos: solo los CERRADOS (isLocked) con pronóstico guardado
+  const groupMatches=Object.values(GROUPS_DATA).flatMap(g=>g.matches)
+    .filter(m=>isLocked(m)&&up[m.id])
+    .sort((a,b)=>(a.date+a.time_ec).localeCompare(b.date+b.time_ec));
+
+  // Knockout: solo cruces cerrados con pronóstico
+  const koMatches=Object.values(knockout)
+    .filter(m=>isLocked(m)&&ukp[m.id])
+    .sort((a,b)=>(a.date+(a.time_ec||'')).localeCompare(b.date+(b.time_ec||'')));
+
+  let html='';
+  if(groupMatches.length){
+    html+='<div class="pp-section-title">⚽ Fase de Grupos</div>';
+    html+=groupMatches.map(m=>ppRow(m,up[m.id],results[m.id],false)).join('');
+  }
+  if(koMatches.length){
+    html+='<div class="pp-section-title">🏆 Eliminatorias</div>';
+    html+=koMatches.map(m=>ppRow(m,ukp[m.id],kresults[m.id],true)).join('');
+  }
+
+  // Especiales: solo si su deadline ya pasó (especialesLocked)
+  const mineEsp=especiales[username]||{};
+  if(especialesLocked()){
+    const espRows=ESP_QUESTIONS.filter(q=>mineEsp[q.key]).map(q=>{
+      const val=mineEsp[q.key];
+      const flag=q.type==='team'?flagImg(val):'';
+      return`<div class="pp-esp-row">${q.icon} <span class="pp-esp-label">${q.label}</span> ${flag}<b style="color:#dfe8e1">${val}</b></div>`;
+    });
+    if(espRows.length){
+      html+='<div class="pp-section-title">⭐ Pronósticos Especiales</div>'+espRows.join('');
+    }
+  }
+
+  if(!html){
+    html='<div class="pp-empty">Este jugador aún no tiene pronósticos cerrados.<br>Los pronósticos aparecen aquí solo cuando se cierra cada partido (1 h antes del inicio), para mantener la competencia justa.</div>';
+  }
+  body.innerHTML=html;
+}
+
+// Cerrar modal con la tecla Escape
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closePlayerPreds(); });
 
 // ── PRONÓSTICOS ESPECIALES — lógica ──
 function especialesLocked(){
