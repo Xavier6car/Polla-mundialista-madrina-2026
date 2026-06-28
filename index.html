@@ -1089,6 +1089,7 @@ window.renderGroup = renderGroup;
 async function renderUpcoming(){
   const container=document.getElementById('upcoming-container');
   document.getElementById('matches-container').innerHTML='';
+  document.getElementById('eliminatorias-container').innerHTML='';
   container.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando...</div>';
   const preds=await getPreds();const results=await getResults();
   const userPreds=preds[currentUser?.username]||{};
@@ -1531,6 +1532,8 @@ window.submitEspResults=submitEspResults;
 // ── FASE ELIMINATORIA (cuadro armado por el admin) ──
 async function renderEliminatorias(){
   const container=document.getElementById('eliminatorias-container');
+  document.getElementById('upcoming-container').innerHTML='';
+  document.getElementById('matches-container').innerHTML='';
   container.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando...</div>';
   const kn=await getKnockout();
   const kp=await getKnockoutPreds();
