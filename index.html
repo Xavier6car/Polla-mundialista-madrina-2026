@@ -1375,16 +1375,8 @@ async function openPlayerPreds(username){
     .sort((a,b)=>(a.date+(a.time_ec||'')).localeCompare(b.date+(b.time_ec||'')));
 
   let html='';
-  if(groupMatches.length){
-    html+='<div class="pp-section-title">⚽ Fase de Grupos</div>';
-    html+=groupMatches.map(m=>ppRow(m,up[m.id],results[m.id],false)).join('');
-  }
-  if(koMatches.length){
-    html+='<div class="pp-section-title">🏆 Eliminatorias</div>';
-    html+=koMatches.map(m=>ppRow(m,ukp[m.id],kresults[m.id],true)).join('');
-  }
 
-  // Especiales: solo si su deadline ya pasó (especialesLocked)
+  // 1) Especiales: solo si su deadline ya pasó (especialesLocked)
   const mineEsp=especiales[username]||{};
   if(especialesLocked()){
     const espRows=ESP_QUESTIONS.filter(q=>mineEsp[q.key]).map(q=>{
@@ -1395,6 +1387,18 @@ async function openPlayerPreds(username){
     if(espRows.length){
       html+='<div class="pp-section-title">⭐ Pronósticos Especiales</div>'+espRows.join('');
     }
+  }
+
+  // 2) Fase eliminatoria
+  if(koMatches.length){
+    html+='<div class="pp-section-title">🏆 Eliminatorias</div>';
+    html+=koMatches.map(m=>ppRow(m,ukp[m.id],kresults[m.id],true)).join('');
+  }
+
+  // 3) Fase de grupos
+  if(groupMatches.length){
+    html+='<div class="pp-section-title">⚽ Fase de Grupos</div>';
+    html+=groupMatches.map(m=>ppRow(m,up[m.id],results[m.id],false)).join('');
   }
 
   if(!html){
