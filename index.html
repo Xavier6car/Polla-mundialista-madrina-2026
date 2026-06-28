@@ -758,7 +758,39 @@ async function tryRestoreSession(){
   catch(e){ return false; }
 }
 
-function refreshActive(){ if(currentScreen==='porvencer'){renderUpcoming();} else {renderGroup(currentGroup);} }
+// Re-renderiza la pantalla que el usuario está viendo, con los datos más recientes.
+// Respeta lo que estás escribiendo (no recarga si tienes foco en un input).
+function refreshActiveScreen(){
+  if(!currentUser || !isTimeReady) return;
+  const ae=document.activeElement;
+  if(ae && (ae.classList.contains('score-input')||ae.classList.contains('combo-input')||ae.classList.contains('especial-input')||ae.classList.contains('admin-input'))) return; // no recargar mientras escribes
+  switch(currentScreen){
+    case 'grupos': renderGroup(currentGroup); break;
+    case 'porvencer': renderUpcoming(); break;
+    case 'eliminatorias': renderEliminatorias(); break;
+    case 'mispron': renderMyPreds(); break;
+    case 'ranking': renderRanking(); break;
+    case 'especiales': renderEspeciales(); break;
+  }
+}
+// Alias retro-compatible (lo usa saveResult)
+function refreshActive(){ refreshActiveScreen(); }
+
+// ── ACTUALIZACIÓN EN TIEMPO REAL (Firebase onValue) ──
+// Cuando el admin guarda un resultado/cruce, o cualquier dato cambia, todos los
+// jugadores conectados ven el cambio al instante, sin recargar ni cambiar de pestaña.
+let liveWatchersStarted=false;
+let liveRefreshTimer=null;
+function scheduleLiveRefresh(){
+  clearTimeout(liveRefreshTimer);
+  liveRefreshTimer=setTimeout(refreshActiveScreen, 350); // agrupa varios cambios seguidos en un solo render
+}
+function startLiveWatchers(){
+  if(liveWatchersStarted || !window.fbWatch) return;
+  liveWatchersStarted=true;
+  ['preds','results','knockout','knockoutPreds','knockoutResults','especiales','especialesResults','users']
+    .forEach(key=>window.fbWatch(key, scheduleLiveRefresh));
+}
 
 // ── SISTEMA DE ARRANQUE SEGURO ──
 let isFirebaseReady = false;
@@ -870,13 +902,9 @@ whenFirebaseReady(async () => {
   sessionRestoreTried = true;
   checkAppReady();
 
-  setInterval(()=>{
-    if(!currentUser || !isTimeReady) return;
-    const ae=document.activeElement;
-    if(ae && (ae.classList.contains('score-input')||ae.classList.contains('combo-input')||ae.classList.contains('especial-input')||ae.classList.contains('admin-input'))) return; // no recargar mientras escribes
-    if(currentScreen==='grupos') renderGroup(currentGroup);
-    else if(currentScreen==='porvencer') renderUpcoming();
-  }, 60000);
+  // Refresco periódico para actualizar los contadores de tiempo (cierre de partidos)
+  // en cualquier pantalla. Los datos en sí ya se actualizan al instante con los watchers.
+  setInterval(refreshActiveScreen, 60000);
 });
 
 // ── LÓGICA DE TIEMPOS DE PARTIDO ──
@@ -1004,6 +1032,7 @@ function afterLogin(){
   document.getElementById('user-avatar').textContent=currentUser.name[0].toUpperCase();
   document.getElementById('user-display').innerHTML=currentUser.name+(currentUser.isAdmin?' <span class="admin-badge">ADMIN</span>':'');
   showScreen('grupos');
+  startLiveWatchers();
 }
 
 function logout(){
