@@ -1092,9 +1092,13 @@ async function renderUpcoming(){
   container.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando...</div>';
   const preds=await getPreds();const results=await getResults();
   const userPreds=preds[currentUser?.username]||{};
+  const kn=await getKnockout();const kp=await getKnockoutPreds();const kr=await getKnockoutResults();
+  const userKP=kp[currentUser?.username]||{};
   const now=serverNow();
-  const upcoming=Object.values(GROUPS_DATA).flatMap(g=>g.matches)
-    .map(m=>({m,dl:getDeadline(m)}))
+  const groupMatches=Object.values(GROUPS_DATA).flatMap(g=>g.matches).map(m=>({m,ko:false}));
+  const koMatches=Object.values(kn).map(m=>({m,ko:true}));
+  const upcoming=[...groupMatches,...koMatches]
+    .map(x=>({...x,dl:getDeadline(x.m)}))
     .filter(x=>x.dl&&x.dl>now&&(x.dl-now)<=86400000)
     .sort((a,b)=>a.dl-b.dl);
   if(!upcoming.length){
@@ -1103,10 +1107,11 @@ async function renderUpcoming(){
   }
   let html='';
   upcoming.forEach(x=>{
-    if(!userPreds[x.m.id]){
+    const hasPred=x.ko?userKP[x.m.id]:userPreds[x.m.id];
+    if(!hasPred){
       html+=`<div id="warn_${x.m.id}" style="font-size:0.72rem;color:var(--red);font-weight:700;margin:4px 0 -4px">⚠️ SIN PRONÓSTICO</div>`;
     }
-    html+=buildMatchCard(x.m,userPreds,results);
+    html+=x.ko?buildKnockoutCard(x.m,userKP,kr):buildMatchCard(x.m,userPreds,results);
   });
   container.innerHTML=html;
 }
