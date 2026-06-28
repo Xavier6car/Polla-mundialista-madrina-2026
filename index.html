@@ -1336,11 +1336,13 @@ function ppRow(match,pred,result,isKnockout){
   const pts=isKnockout?calcKnockoutPoints(pred,result):calcPoints(pred,result);
   const ptsCls=pts>=5?'p5':pts>=2?'p2':'p0';
   const ptsBadge=result?`<span class="pp-pts ${ptsCls}">${pts} pt${pts===1?'':'s'}</span>`:'';
+  const predDef=(isKnockout&&pred.def)?(pred.def==='TE'?' · T.E':' · Pen'):'';
   let realTxt='';
   if(result){
-    realTxt=`<span class="pp-real">(${result.home}–${result.away}${result.def?` · ${result.def}`:''})</span>`;
+    const rdef=result.def?(result.def==='TE'?' · T.E':' · Pen'):'';
+    realTxt=`<span class="pp-real">(${result.home}–${result.away}${rdef})</span>`;
   }
-  return`<div class="pp-row"><div class="pp-meta">${dateTxt}<br>${timeTxt}</div>${hf}<span class="pp-team r">${match.home}</span><span class="pp-score">${pred.home} – ${pred.away}</span><span class="pp-team">${match.away}</span>${af}${realTxt}${ptsBadge}</div>`;
+  return`<div class="pp-row"><div class="pp-meta">${dateTxt}<br>${timeTxt}</div>${hf}<span class="pp-team r">${match.home}</span><span class="pp-score">${pred.home} – ${pred.away}${predDef}</span><span class="pp-team">${match.away}</span>${af}${realTxt}${ptsBadge}</div>`;
 }
 
 async function openPlayerPreds(username){
