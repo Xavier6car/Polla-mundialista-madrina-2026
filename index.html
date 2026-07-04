@@ -1588,7 +1588,9 @@ async function renderEliminatorias(){
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:2px"><div style="flex:1;min-width:130px"><label class="esp-admin-label">Fecha</label><input class="especial-input" type="date" id="k-date" value="2026-06-30"></div><div style="flex:1;min-width:110px"><label class="esp-admin-label">Hora (ECU)</label><input class="especial-input" type="time" id="k-time" value="14:00"></div></div>
     <label class="esp-admin-label">Sede (opcional)</label>
     <input class="especial-input" id="k-venue" autocomplete="off" placeholder="Estadio, ciudad">
-    <button class="save-btn" style="margin-top:14px" onclick="addKnockoutMatch()">➕ Agregar cruce</button></div>`;
+    <button class="save-btn" style="margin-top:14px" onclick="addKnockoutMatch()">➕ Agregar cruce</button>
+    <button class="save-btn" style="margin-top:10px;background:rgba(212,175,55,0.12)" onclick="loadOctavosPreset()">⚡ Cargar octavos de final</button>
+    <div class="sub" style="margin-top:6px">Agrega de una vez los cruces de octavos del calendario. Revisa las horas (Ecuador) y ajústalas con “✏️ Editar” si hace falta.</div></div>`;
   }
 
   if(!matches.length){
@@ -1620,7 +1622,7 @@ function buildKnockoutCard(match,userKP,kResults){
   let adminHtml='';
   if(currentUser?.isAdmin){
     const rh=result?result.home:'';const ra=result?result.away:'';const realDraw=result&&result.home===result.away;const rdef=result?(result.def||''):'';
-    adminHtml=`<div class="actual-result" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap"><span style="color:var(--gold-dim);font-size:0.7rem;font-weight:700">RESULTADO REAL:</span><input class="admin-input" type="number" min="0" max="20" value="${rh}" id="kar_h_${match.id}" placeholder="0" oninput="onKnockoutAdminScoreChange('${match.id}')"><span style="color:var(--gray)">-</span><input class="admin-input" type="number" min="0" max="20" value="${ra}" id="kar_a_${match.id}" placeholder="0" oninput="onKnockoutAdminScoreChange('${match.id}')"><button class="admin-save-btn" onclick="saveKnockoutResult('${match.id}')">Guardar</button><button class="admin-save-btn" style="background:rgba(232,64,64,0.15);border-color:var(--red);color:var(--red)" onclick="deleteKnockoutMatch('${match.id}')" title="Eliminar cruce">🗑</button>${result?`<span class="result-score">(${result.home}-${result.away}${rdef?(rdef==='TE'?' · T.E':' · Pen'):''})</span>`:''}</div><div class="kdef-wrap" id="kadefwrap_${match.id}" style="display:${realDraw?'block':'none'};margin-top:0"><div class="kdef-q">¿Cómo se definió realmente?</div><div class="kdef-opts"><button type="button" class="kdef-btn ${rdef==='TE'?'active':''}" id="kadefTE_${match.id}" onclick="setKAdminDef('${match.id}','TE')">⏱ Tiempo Extra</button><button type="button" class="kdef-btn ${rdef==='PEN'?'active':''}" id="kadefPEN_${match.id}" onclick="setKAdminDef('${match.id}','PEN')">🥅 Penales</button></div></div></div>`;
+    adminHtml=`<div class="actual-result" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap"><span style="color:var(--gold-dim);font-size:0.7rem;font-weight:700">RESULTADO REAL:</span><input class="admin-input" type="number" min="0" max="20" value="${rh}" id="kar_h_${match.id}" placeholder="0" oninput="onKnockoutAdminScoreChange('${match.id}')"><span style="color:var(--gray)">-</span><input class="admin-input" type="number" min="0" max="20" value="${ra}" id="kar_a_${match.id}" placeholder="0" oninput="onKnockoutAdminScoreChange('${match.id}')"><button class="admin-save-btn" onclick="saveKnockoutResult('${match.id}')">Guardar</button><button class="admin-save-btn" style="background:rgba(212,175,55,0.15);border-color:var(--gold-dim);color:var(--gold)" onclick="toggleKnockoutEdit('${match.id}')" title="Modificar el cruce sin borrar los pronósticos">✏️ Editar</button><button class="admin-save-btn" style="background:rgba(232,64,64,0.15);border-color:var(--red);color:var(--red)" onclick="deleteKnockoutMatch('${match.id}')" title="Eliminar cruce">🗑</button>${result?`<span class="result-score">(${result.home}-${result.away}${rdef?(rdef==='TE'?' · T.E':' · Pen'):''})</span>`:''}</div><div class="kdef-wrap" id="kadefwrap_${match.id}" style="display:${realDraw?'block':'none'};margin-top:0"><div class="kdef-q">¿Cómo se definió realmente?</div><div class="kdef-opts"><button type="button" class="kdef-btn ${rdef==='TE'?'active':''}" id="kadefTE_${match.id}" onclick="setKAdminDef('${match.id}','TE')">⏱ Tiempo Extra</button><button type="button" class="kdef-btn ${rdef==='PEN'?'active':''}" id="kadefPEN_${match.id}" onclick="setKAdminDef('${match.id}','PEN')">🥅 Penales</button></div></div>${buildKnockoutEditPanel(match)}</div>`;
   }else if(result){
     adminHtml=`<div class="actual-result"><span>Resultado oficial:</span><span class="result-score">${match.home} ${result.home} – ${result.away} ${match.away}${result.def?(result.def==='TE'?' (T.E)':' (Penales)'):''}</span>${ptsHtml}</div>`;
   }
@@ -1744,6 +1746,76 @@ async function deleteKnockoutMatch(id){
   renderEliminatorias();
 }
 window.deleteKnockoutMatch=deleteKnockoutMatch;
+
+// ── EDITAR un cruce ya creado (sin borrarlo → conserva los pronósticos de todos) ──
+function buildKnockoutEditPanel(match){
+  const id=match.id;
+  const rounds=KNOCKOUT_ROUNDS.map(r=>`<option value="${r}"${r===match.round?' selected':''}>${r}</option>`).join('');
+  return `<div class="kedit-panel" id="kedit_${id}" style="display:none;border-top:1px dashed var(--gold-dim);margin-top:8px;padding-top:10px;text-align:left">
+    <div class="sub" style="color:var(--gold);font-weight:700;margin-bottom:6px">✏️ Modificar cruce <span style="color:var(--gray);font-weight:400">— no borra los pronósticos</span></div>
+    <label class="esp-admin-label">Ronda</label>
+    <select class="especial-select" id="keRound_${id}">${rounds}</select>
+    <label class="esp-admin-label">Equipo local</label>
+    <div class="combo-pick"><span class="combo-flag" id="keHome_${id}-flag">${flagImg(match.home)}</span><div class="combo" id="keHome_${id}-combo"><input class="especial-input combo-input" id="keHome_${id}" autocomplete="off" value="${esc(match.home)}" placeholder="Busca el equipo local..." oninput="comboFilter('keHome_${id}')" onfocus="comboFilter('keHome_${id}')" onblur="comboBlur('keHome_${id}')"><div class="combo-list" id="keHome_${id}-list"></div></div></div>
+    <label class="esp-admin-label">Equipo visitante</label>
+    <div class="combo-pick"><span class="combo-flag" id="keAway_${id}-flag">${flagImg(match.away)}</span><div class="combo" id="keAway_${id}-combo"><input class="especial-input combo-input" id="keAway_${id}" autocomplete="off" value="${esc(match.away)}" placeholder="Busca el equipo visitante..." oninput="comboFilter('keAway_${id}')" onfocus="comboFilter('keAway_${id}')" onblur="comboBlur('keAway_${id}')"><div class="combo-list" id="keAway_${id}-list"></div></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:2px"><div style="flex:1;min-width:130px"><label class="esp-admin-label">Fecha</label><input class="especial-input" type="date" id="keDate_${id}" value="${esc(match.date)}"></div><div style="flex:1;min-width:110px"><label class="esp-admin-label">Hora (ECU)</label><input class="especial-input" type="time" id="keTime_${id}" value="${esc(match.time_ec)}"></div></div>
+    <label class="esp-admin-label">Sede (opcional)</label>
+    <input class="especial-input" id="keVenue_${id}" autocomplete="off" value="${esc(match.venue||'')}" placeholder="Estadio, ciudad">
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="save-btn" style="flex:1" onclick="saveKnockoutEdit('${id}')">💾 Guardar cambios</button><button class="save-btn" style="flex:0 0 auto;background:transparent;border-color:var(--gray);color:var(--gray)" onclick="toggleKnockoutEdit('${id}')">Cancelar</button></div>
+  </div>`;
+}
+
+function toggleKnockoutEdit(id){
+  const p=document.getElementById('kedit_'+id);
+  if(!p) return;
+  p.style.display=(p.style.display==='none'||!p.style.display)?'block':'none';
+}
+window.toggleKnockoutEdit=toggleKnockoutEdit;
+
+async function saveKnockoutEdit(id){
+  const kn=await getKnockout();
+  if(!kn[id]){showToast('El cruce ya no existe','error');return;}
+  const round=document.getElementById('keRound_'+id).value;
+  const home=resolveTeam(document.getElementById('keHome_'+id).value);
+  const away=resolveTeam(document.getElementById('keAway_'+id).value);
+  const date=document.getElementById('keDate_'+id).value;
+  const time=document.getElementById('keTime_'+id).value;
+  const venue=document.getElementById('keVenue_'+id).value.trim();
+  if(!home||!away){showToast('Elige ambos equipos desde el buscador','error');return;}
+  if(home===away){showToast('Los equipos deben ser distintos','error');return;}
+  if(!date||!time){showToast('Ingresa fecha y hora','error');return;}
+  // Conservamos el mismo id → los pronósticos y el resultado ya guardados siguen ligados a este cruce.
+  kn[id]={...kn[id],id,round,home,away,date,time_ec:time,venue:venue||'Por definir'};
+  await saveKnockout(kn);
+  showToast('✅ Cruce actualizado (pronósticos conservados)');
+  renderEliminatorias();
+}
+window.saveKnockoutEdit=saveKnockoutEdit;
+
+// ── Cargar de una vez los cruces de octavos del calendario oficial ──
+// Horas en zona Ecuador (UTC-5). Revísalas y ajústalas con "✏️ Editar" si cambian.
+const OCTAVOS_PRESET=[
+  {round:'Octavos', home:'Brasil',         away:'Noruega',    date:'2026-07-05', time_ec:'14:00', venue:'MetLife Stadium, East Rutherford, New Jersey'},
+  {round:'Octavos', home:'México',         away:'Inglaterra', date:'2026-07-05', time_ec:'20:00', venue:'Estadio Banorte, Ciudad de México'},
+  {round:'Octavos', home:'Portugal',       away:'España',     date:'2026-07-06', time_ec:'14:00', venue:'AT&T Stadium, Arlington, Texas'},
+  {round:'Octavos', home:'Estados Unidos', away:'Bélgica',    date:'2026-07-06', time_ec:'21:00', venue:'Lumen Field, Seattle, Washington'},
+  {round:'Octavos', home:'Argentina',      away:'Egipto',     date:'2026-07-07', time_ec:'10:00', venue:'Mercedes-Benz Stadium, Atlanta, Georgia'}
+];
+async function loadOctavosPreset(){
+  const kn=await getKnockout();
+  const exists=(h,a)=>Object.values(kn).some(m=>m.round==='Octavos'&&((m.home===h&&m.away===a)||(m.home===a&&m.away===h)));
+  const nuevos=OCTAVOS_PRESET.filter(m=>!exists(m.home,m.away));
+  if(!nuevos.length){showToast('Los octavos ya están cargados','error');return;}
+  const lista=nuevos.map(m=>`• ${m.home} vs ${m.away}  (${formatDate(m.date)} · ${m.time_ec}h ECU)`).join('\n');
+  if(!confirm('Se agregarán estos cruces de octavos:\n\n'+lista+'\n\nLas horas están en zona Ecuador; podrás ajustarlas con “✏️ Editar”. ¿Continuar?')) return;
+  let base=Date.now();
+  nuevos.forEach((m,i)=>{const id='K'+(base+i);kn[id]={id,...m,venue:m.venue||'Por definir'};});
+  await saveKnockout(kn);
+  showToast('✅ '+nuevos.length+' cruces de octavos cargados');
+  renderEliminatorias();
+}
+window.loadOctavosPreset=loadOctavosPreset;
 
 // ── COCOS (caen desde arriba y rebotan en el suelo con física realista) ──
 function launchConfetti(){
