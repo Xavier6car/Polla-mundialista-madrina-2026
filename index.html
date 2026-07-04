@@ -744,6 +744,9 @@ function resolveTeam(v){v=(v||'').trim();const c=ALL_TEAMS.find(t=>normalizeStr(
 let currentUser=null;
 let currentGroup='A';
 let currentScreen='grupos';
+// Estado de plegado de las rondas en Eliminatorias (recuerda qué títulos están recogidos
+// aunque la pantalla se refresque en vivo). key = nombre de la ronda, valor = true si está oculta.
+let koCollapsed={};
 
 // ── SESIÓN PERSISTENTE (se mantiene al recargar; caduca tras inactividad) ──
 const SESSION_MINUTES = 720; // 12 horas. Cambia este número para otra duración (ej. 60 = 1 hora).
@@ -1600,15 +1603,38 @@ async function renderEliminatorias(){
   }
 
   html+=`<div style="font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--gray);margin:16px 0 4px">🎯 Exacto = <b style="color:var(--gold)">5 pts</b> · ✅ Correcto = <b style="color:var(--green)">2 pts</b> · Si predices empate, indica si se define por T.E o Penales.</div>`;
-  KNOCKOUT_ROUNDS.forEach(round=>{
+  // Rondas más actuales primero (Final → … → Octavos → 16avos), solo las que ya tienen cruces.
+  const orderedRounds=[...KNOCKOUT_ROUNDS].reverse().filter(round=>matches.some(m=>m.round===round));
+  // Por defecto: la ronda más actual (la primera) queda abierta y las anteriores plegadas.
+  orderedRounds.forEach((round,i)=>{ if(!(round in koCollapsed)) koCollapsed[round]=(i!==0); });
+  orderedRounds.forEach(round=>{
     const rm=matches.filter(m=>m.round===round).sort((a,b)=>(a.date+a.time_ec).localeCompare(b.date+b.time_ec));
-    if(!rm.length) return;
-    html+=`<div style="font-size:0.78rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">${round}</div>`;
+    const collapsed=!!koCollapsed[round];
+    const rid=round.replace(/\s+/g,'_');
+    html+=`<button type="button" class="ko-round-head" onclick="toggleKoRound('${round}')" aria-expanded="${!collapsed}" style="width:100%;display:flex;align-items:center;gap:10px;background:rgba(212,175,55,0.08);border:1px solid var(--gold-dim);border-radius:10px;padding:10px 14px;margin:16px 0 8px;cursor:pointer;color:var(--gold);font-family:'Oswald',sans-serif;font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;text-align:left"><span class="ko-chevron" style="display:inline-block;width:14px;font-size:0.9rem;transition:transform .15s">${collapsed?'▸':'▾'}</span><span>${round}</span><span style="margin-left:auto;background:rgba(212,175,55,0.18);border-radius:10px;padding:1px 9px;font-size:0.72rem">${rm.length} ${rm.length===1?'partido':'partidos'}</span></button>`;
+    html+=`<div class="ko-round-body" id="koBody_${rid}" style="display:${collapsed?'none':'block'}">`;
     rm.forEach(m=>{ html+=buildKnockoutCard(m,userKP,kr); });
+    html+=`</div>`;
   });
   container.innerHTML=html;
 }
 window.renderEliminatorias=renderEliminatorias;
+
+// Plegar/desplegar una ronda (estilo título de Word). Actúa directo sobre el DOM
+// para que sea instantáneo, y recuerda el estado en koCollapsed entre refrescos.
+function toggleKoRound(round){
+  const collapsed=!koCollapsed[round];
+  koCollapsed[round]=collapsed;
+  const body=document.getElementById('koBody_'+round.replace(/\s+/g,'_'));
+  if(body) body.style.display=collapsed?'none':'block';
+  const head=body?body.previousElementSibling:null;
+  if(head){
+    head.setAttribute('aria-expanded',String(!collapsed));
+    const chev=head.querySelector('.ko-chevron');
+    if(chev) chev.textContent=collapsed?'▸':'▾';
+  }
+}
+window.toggleKoRound=toggleKoRound;
 
 function buildKnockoutCard(match,userKP,kResults){
   const cd=getCountdownText(match);const locked=cd.locked;
