@@ -1593,7 +1593,8 @@ async function renderEliminatorias(){
     <input class="especial-input" id="k-venue" autocomplete="off" placeholder="Estadio, ciudad">
     <button class="save-btn" style="margin-top:14px" onclick="addKnockoutMatch()">➕ Agregar cruce</button>
     <button class="save-btn" style="margin-top:10px;background:rgba(212,175,55,0.12)" onclick="loadOctavosPreset()">⚡ Cargar octavos de final</button>
-    <div class="sub" style="margin-top:6px">Agrega de una vez los cruces de octavos del calendario. Revisa las horas (Ecuador) y ajústalas con “✏️ Editar” si hace falta.</div></div>`;
+    <button class="save-btn" style="margin-top:10px;background:rgba(212,175,55,0.12)" onclick="loadCuartosPreset()">⚡ Cargar cuartos de final</button>
+    <div class="sub" style="margin-top:6px">Agrega de una vez los cruces de octavos o cuartos del calendario. Revisa las horas (Ecuador) y ajústalas con “✏️ Editar” si hace falta.</div></div>`;
   }
 
   if(!matches.length){
@@ -1842,6 +1843,29 @@ async function loadOctavosPreset(){
   renderEliminatorias();
 }
 window.loadOctavosPreset=loadOctavosPreset;
+
+// ── Cargar de una vez los cruces de cuartos de final del calendario oficial ──
+// Horas en zona Ecuador (UTC-5). Revísalas y ajústalas con "✏️ Editar" si cambian.
+const CUARTOS_PRESET=[
+  {round:'Cuartos', home:'Francia',  away:'Marruecos',  date:'2026-07-09', time_ec:'15:00', venue:'Estadio Boston'},
+  {round:'Cuartos', home:'España',   away:'Bélgica',    date:'2026-07-10', time_ec:'14:00', venue:'Estadio Los Ángeles'},
+  {round:'Cuartos', home:'Noruega',  away:'Inglaterra', date:'2026-07-11', time_ec:'16:00', venue:'Estadio Miami'},
+  {round:'Cuartos', home:'Argentina',away:'Suiza',      date:'2026-07-11', time_ec:'20:00', venue:'Estadio Kansas City'}
+];
+async function loadCuartosPreset(){
+  const kn=await getKnockout();
+  const exists=(h,a)=>Object.values(kn).some(m=>m.round==='Cuartos'&&((m.home===h&&m.away===a)||(m.home===a&&m.away===h)));
+  const nuevos=CUARTOS_PRESET.filter(m=>!exists(m.home,m.away));
+  if(!nuevos.length){showToast('Los cuartos ya están cargados','error');return;}
+  const lista=nuevos.map(m=>`• ${m.home} vs ${m.away}  (${formatDate(m.date)} · ${m.time_ec}h ECU)`).join('\n');
+  if(!confirm('Se agregarán estos cruces de cuartos de final:\n\n'+lista+'\n\nLas horas están en zona Ecuador; podrás ajustarlas con “✏️ Editar”. ¿Continuar?')) return;
+  let base=Date.now();
+  nuevos.forEach((m,i)=>{const id='K'+(base+i);kn[id]={id,...m,venue:m.venue||'Por definir'};});
+  await saveKnockout(kn);
+  showToast('✅ '+nuevos.length+' cruces de cuartos cargados');
+  renderEliminatorias();
+}
+window.loadCuartosPreset=loadCuartosPreset;
 
 // ── COCOS (caen desde arriba y rebotan en el suelo con física realista) ──
 function launchConfetti(){
