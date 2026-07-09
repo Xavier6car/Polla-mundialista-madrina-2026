@@ -1187,7 +1187,7 @@ async function savePred(matchId){
   await savePreds(preds);
   if(btn){btn.disabled=false;btn.textContent='Guardar';}
   showToast('✅ Pronóstico guardado');
-  launchConfetti();
+  launchConfetti(itemGanador(getMatchById(matchId), parseInt(h), parseInt(a)));
   markCardSaved('card_'+matchId, parseInt(h)+'–'+parseInt(a));
 }
 window.savePred = savePred;
@@ -1728,7 +1728,7 @@ async function saveKnockoutPred(id){
   await saveKnockoutPreds(kp);
   if(btn){btn.disabled=false;btn.textContent='Guardar';}
   showToast('✅ Pronóstico guardado');
-  launchConfetti();
+  launchConfetti(itemGanador(match, parseInt(h), parseInt(a)));
   markCardSaved('kcard_'+id, parseInt(h)+'–'+parseInt(a)+(def?(def==='TE'?' · T.E':' · Pen'):''));
 }
 window.saveKnockoutPred=saveKnockoutPred;
@@ -1867,8 +1867,72 @@ async function loadCuartosPreset(){
 }
 window.loadCuartosPreset=loadCuartosPreset;
 
-// ── COCOS (caen desde arriba y rebotan en el suelo con física realista) ──
-function launchConfetti(){
+// ── ÍTEM REPRESENTATIVO DE CADA PAÍS ──
+// Cuando el jugador pronostica un ganador, en vez de los cocos caen estos
+// elementos típicos del país elegido. Investigado por lo más representativo
+// (comida, símbolo o animal emblemático) de cada selección.
+const ITEM_PAIS = {
+  "Alemania":"🥨",              // pretzel
+  "Arabia Saudita":"🐪",        // camello del desierto
+  "Argelia":"🕌",               // mezquita
+  "Argentina":"🧉",             // mate
+  "Australia":"🦘",             // canguro
+  "Austria":"🎻",               // música clásica (Mozart)
+  "Bosnia y Herzegovina":"⛰️",  // montañas
+  "Brasil":"🦜",                // tucán / Amazonas
+  "Bélgica":"🧇",               // gofre (waffle)
+  "Cabo Verde":"🏝️",           // islas
+  "Canadá":"🍁",                // hoja de arce
+  "Colombia":"☕",              // café
+  "Corea del Sur":"🍜",         // ramyeon
+  "Costa de Marfil":"🐘",       // "Los Elefantes"
+  "Croacia":"🏁",               // tablero rojiblanco de su camiseta
+  "Curazao":"🦩",               // flamenco del Caribe
+  "Ecuador":"🍌",               // banano (¡campeón exportador!)
+  "Egipto":"🏺",                // faraones / antigüedad
+  "Escocia":"🥃",               // whisky
+  "España":"🥘",                // paella
+  "Estados Unidos":"🍔",        // hamburguesa
+  "Francia":"🥐",               // croissant
+  "Ghana":"🥁",                 // tambores
+  "Haití":"🍲",                 // soup joumou (patrimonio UNESCO)
+  "Inglaterra":"🫖",            // té
+  "Irak":"🌴",                  // dátiles / palmeras
+  "Irán":"🐈",                  // gato persa
+  "Japón":"🍣",                 // sushi
+  "Jordania":"🏜️",             // Petra / desierto
+  "Marruecos":"🌯",             // shawarma
+  "México":"🌮",                // taco
+  "Noruega":"🎿",               // esquí
+  "Nueva Zelanda":"🥝",         // kiwi
+  "Panamá":"🚢",                // Canal de Panamá
+  "Paraguay":"🎶",              // arpa paraguaya
+  "Países Bajos":"🌷",          // tulipán
+  "Portugal":"🐓",              // Gallo de Barcelos
+  "Qatar":"🦅",                 // halcón
+  "RD Congo":"🐆",              // "Los Leopardos"
+  "República Checa":"🍺",       // cerveza (pilsner)
+  "Senegal":"🦁",               // "Leones de la Teranga"
+  "Sudáfrica":"🦓",             // cebra / sabana
+  "Suecia":"🪑",                // diseño nórdico (IKEA)
+  "Suiza":"🍫",                 // chocolate
+  "Turquía":"🧿",               // ojo turco (nazar)
+  "Túnez":"🫒",                 // aceitunas / olivos
+  "Uruguay":"🥩",               // asado
+  "Uzbekistán":"🍚"             // plov (arroz)
+};
+// Devuelve el ítem del ganador pronosticado, o '' si es empate (o país sin
+// ítem) para que caigan los cocos de siempre.
+function itemGanador(match, h, a){
+  if(!match) return '';
+  if(h>a) return ITEM_PAIS[match.home]||'';
+  if(a>h) return ITEM_PAIS[match.away]||'';
+  return ''; // empate → cocos
+}
+
+// ── COCOS / ÍTEMS (caen desde arriba y rebotan en el suelo con física realista) ──
+// Si se pasa un emoji, caen esos ítems del país; si no, caen los cocos de siempre.
+function launchConfetti(emoji){
   const canvas=document.createElement('canvas');
   canvas.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99999;';
   document.body.appendChild(canvas);
@@ -1899,6 +1963,14 @@ function launchConfetti(){
   function drawCoco(c){
     ctx.save();
     ctx.translate(c.x,c.y); ctx.rotate(c.rot);
+    if(emoji){
+      // Ítem representativo del país (croissant, taco, shawarma, etc.)
+      ctx.font=(c.r*2)+'px serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(emoji,0,0);
+      ctx.restore();
+      return;
+    }
     // cuerpo
     const g=ctx.createRadialGradient(-c.r*0.3,-c.r*0.3,c.r*0.2,0,0,c.r);
     g.addColorStop(0,'#8a5a2b'); g.addColorStop(1,'#4a2c12');
