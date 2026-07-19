@@ -425,6 +425,49 @@
     .header-inner{height:56px;}
     .logo{font-size:0.95rem;letter-spacing:0.3px;}
   }
+
+  /* ── Pantalla de cierre / despedida ── */
+  .nav-final{padding:6px 14px;border-radius:6px;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .nav-final:hover{background:var(--pitch-light);}
+  .nav-final.active{background:var(--gold);color:var(--pitch);}
+  .mobile-final{text-align:left;padding:14px 1.5rem;background:transparent;border:none;border-bottom:1px solid var(--gold-dim);color:var(--gold);font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:background 0.15s;}
+  .mobile-final:hover,.mobile-final.active{background:var(--pitch-light);}
+  .cierre-wrap{max-width:760px;margin:0 auto;text-align:center;animation:cierreIn 0.6s ease;}
+  @keyframes cierreIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .cierre-hero{background:linear-gradient(180deg,#0c2413,var(--card-bg));border:1px solid var(--gold-dim);border-radius:18px;padding:2.2rem 1.5rem 1.8rem;box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+  .cierre-trophy{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 10px rgba(240,192,64,0.4));animation:trophyFloat 3s ease-in-out infinite;}
+  @keyframes trophyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .cierre-kicker{font-family:'Oswald',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--gray);font-size:0.8rem;margin-top:0.6rem;}
+  .cierre-title{font-family:'Oswald',sans-serif;font-size:2rem;color:var(--gold);margin:0.2rem 0 0.3rem;font-weight:700;}
+  .cierre-sub{color:var(--gray);font-size:0.95rem;max-width:520px;margin:0.2rem auto 0;line-height:1.5;}
+  /* Podio */
+  .podium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:2rem auto 0.5rem;max-width:560px;}
+  .podium-col{flex:1;display:flex;flex-direction:column;align-items:center;}
+  .podium-medal{font-size:2rem;margin-bottom:0.35rem;}
+  .podium-name{font-weight:700;font-size:0.95rem;color:var(--white);margin-bottom:0.15rem;word-break:break-word;}
+  .podium-pts{font-size:0.8rem;color:var(--gold);font-weight:600;margin-bottom:0.5rem;}
+  .podium-bar{width:100%;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:0.5rem;font-family:'Oswald',sans-serif;font-size:1.4rem;font-weight:700;color:var(--pitch);}
+  .podium-1 .podium-bar{height:130px;background:linear-gradient(180deg,#f0c040,#c9952a);}
+  .podium-2 .podium-bar{height:96px;background:linear-gradient(180deg,#d8dde2,#9aa0a6);}
+  .podium-3 .podium-bar{height:74px;background:linear-gradient(180deg,#d59a63,#a06a3c);}
+  .podium-1 .podium-medal{font-size:2.6rem;}
+  .cierre-rest{margin:1.6rem auto 0;text-align:left;max-width:520px;}
+  .cierre-rest-row{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);font-size:0.9rem;}
+  .cierre-rest-row:last-child{border-bottom:none;}
+  .cierre-rest-row .pos{color:var(--gray);width:26px;flex:0 0 26px;}
+  .cierre-rest-row .nm{flex:1;color:var(--white);}
+  .cierre-rest-row .pt{color:var(--gold);font-weight:600;}
+  .cierre-thanks{margin-top:1.8rem;color:var(--white);font-size:1rem;line-height:1.6;}
+  .cierre-thanks b{color:var(--gold);}
+  .cierre-actions{margin-top:1.6rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .cierre-btn{padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:var(--pitch-light);color:var(--white);font-family:'Inter',sans-serif;font-weight:600;font-size:0.9rem;cursor:pointer;transition:all 0.2s;}
+  .cierre-btn.primary{background:var(--gold);color:var(--pitch);border-color:var(--gold);}
+  .cierre-btn:hover{transform:translateY(-2px);}
+  @media(max-width:600px){
+    .cierre-title{font-size:1.6rem;}
+    .podium-name{font-size:0.82rem;}
+    .podium-1 .podium-bar{height:110px;}.podium-2 .podium-bar{height:82px;}.podium-3 .podium-bar{height:64px;}
+  }
 </style>
 </head>
 <body>
@@ -449,6 +492,7 @@
     </div>
   </div>
   <div class="nav-tabs" id="nav-tabs" style="display:none">
+    <button class="nav-final" onclick="navClick(this,'cierre')">🏆 Resultado Final</button>
     <button class="nav-tab active" onclick="navClick(this,'grupos')">Fase de Grupos</button>
     <button class="nav-tab" onclick="navClick(this,'porvencer')">Por Vencer</button>
     <button class="nav-tab" onclick="navClick(this,'eliminatorias')">Eliminatorias</button>
@@ -458,6 +502,7 @@
     <button class="nav-tab" onclick="navClick(this,'reglas')">Reglas</button>
   </div>
   <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-final" onclick="navClick(this,'cierre')">🏆 Resultado Final</button>
     <button class="mobile-menu-item active" onclick="navClick(this,'grupos')">📅 Fase de Grupos</button>
     <button class="mobile-menu-item" onclick="navClick(this,'porvencer')">⏰ Por Vencer</button>
     <button class="mobile-menu-item" onclick="navClick(this,'eliminatorias')">🏆 Eliminatorias</button>
@@ -505,6 +550,24 @@
         </div>
         <button class="btn-primary" onclick="doRegister()" id="btn-register">Crear cuenta</button>
         <div class="login-switch">¿Ya tienes cuenta? <a onclick="toggleForm(false)">Iniciar sesión</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-cierre" class="section-hidden">
+    <div class="cierre-wrap">
+      <div class="cierre-hero">
+        <div class="cierre-trophy">🏆</div>
+        <div class="cierre-kicker">Polla Mundialista · Madrina 2026</div>
+        <h1 class="cierre-title">¡La polla llegó a su final!</h1>
+        <p class="cierre-sub">El Mundial terminó y con él nuestra polla. Estos son los resultados definitivos. ¡Gracias a todos por jugar!</p>
+        <div id="cierre-podium"><div style="color:var(--gray);padding:2rem">Cargando resultados…</div></div>
+        <div id="cierre-rest" class="cierre-rest"></div>
+        <p class="cierre-thanks">Gracias por acompañarnos partido a partido. <b>¡Nos vemos en la próxima!</b> ⚽</p>
+        <div class="cierre-actions">
+          <button class="cierre-btn primary" onclick="showScreen('ranking')">Ver ranking completo</button>
+          <button class="cierre-btn" onclick="showScreen('grupos')">Explorar la polla</button>
+        </div>
       </div>
     </div>
   </div>
@@ -951,12 +1014,15 @@ function getDeadline(match){
 
 function showScreen(name){
   currentScreen=name;
-  ['login','grupos','porvencer','eliminatorias','especiales','mispron','ranking','reglas'].forEach(s=>document.getElementById(`screen-${s}`)?.classList.add('section-hidden'));
+  ['login','cierre','grupos','porvencer','eliminatorias','especiales','mispron','ranking','reglas'].forEach(s=>document.getElementById(`screen-${s}`)?.classList.add('section-hidden'));
   document.getElementById(`screen-${name}`)?.classList.remove('section-hidden');
   const idx={grupos:0,porvencer:1,eliminatorias:2,especiales:3,mispron:4,ranking:5,reglas:6}[name];
   document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   document.querySelectorAll('.mobile-menu-item').forEach((t,i)=>{ if(i<7) t.classList.toggle('active',i===idx); });
+  const isFinal=name==='cierre';
+  document.querySelectorAll('.nav-final,.mobile-final').forEach(t=>t.classList.toggle('active',isFinal));
   window.scrollTo(0,0);
+  if(name==='cierre') renderCierre();
   if(name==='grupos') renderGroup(currentGroup);
   if(name==='porvencer') renderUpcoming();
   if(name==='eliminatorias') renderEliminatorias();
@@ -1034,7 +1100,7 @@ function afterLogin(){
   document.body.classList.add('logged-in');
   document.getElementById('user-avatar').textContent=currentUser.name[0].toUpperCase();
   document.getElementById('user-display').innerHTML=currentUser.name+(currentUser.isAdmin?' <span class="admin-badge">ADMIN</span>':'');
-  showScreen('grupos');
+  showScreen('cierre');
   startLiveWatchers();
 }
 
@@ -1052,7 +1118,7 @@ function logout(){
   document.getElementById('nav-tabs').style.display='none';
   document.getElementById('hamburger').style.display='none';
   document.body.classList.remove('logged-in');
-  ['grupos','porvencer','eliminatorias','especiales','mispron','ranking','reglas'].forEach(s=>document.getElementById(`screen-${s}`)?.classList.add('section-hidden'));
+  ['cierre','grupos','porvencer','eliminatorias','especiales','mispron','ranking','reglas'].forEach(s=>document.getElementById(`screen-${s}`)?.classList.add('section-hidden'));
   document.getElementById('screen-login').classList.remove('section-hidden');
 }
 window.logout = logout;
@@ -1299,9 +1365,8 @@ async function renderMyPreds(){
   container.innerHTML=(espHtml+matchesHtml)||'<div style="color:var(--gray);text-align:center;padding:2rem">Aún no tienes pronósticos guardados</div>';
 }
 
-async function renderRanking(){
-  const list=document.getElementById('ranking-list');
-  list.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando ranking...</div>';
+// Calcula y ordena los puntajes de todos los jugadores (reutilizado por ranking y cierre)
+async function computeScores(){
   const users=await getUsers();const preds=await getPreds();const results=await getResults();
   const especiales=await getEspeciales();const espResults=await getEspecialesResults();
   const kpreds=await getKnockoutPreds();const kresults=await getKnockoutResults();
@@ -1314,8 +1379,38 @@ async function renderRanking(){
     const espPts=calcEspecialesPoints(especiales[username],espResults);total+=espPts;
     return{username,name:users[username].name,total,exact,correct,espPts};
   });
-  if(!scores.length){ list.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Aún no hay jugadores en el ranking</div>'; return; }
   scores.sort((a,b)=>b.total-a.total||b.exact-a.exact||b.correct-a.correct);
+  return scores;
+}
+
+// ── Pantalla de cierre: podio Top 3 + resto del ranking ──
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function renderCierre(){
+  const podium=document.getElementById('cierre-podium');
+  const rest=document.getElementById('cierre-rest');
+  rest.innerHTML='';
+  const scores=await computeScores();
+  if(!scores.length){ podium.innerHTML='<div style="color:var(--gray);padding:2rem">Aún no hay resultados para mostrar.</div>'; return; }
+  const top=scores.slice(0,3);
+  // Orden visual del podio: 2º · 1º · 3º
+  const order=[top[1],top[0],top[2]].filter(Boolean);
+  const rankOf=s=>scores.indexOf(s)+1;
+  const medals={1:'🥇',2:'🥈',3:'🥉'};
+  podium.innerHTML='<div class="podium">'+order.map(s=>{
+    const r=rankOf(s);
+    return`<div class="podium-col podium-${r}"><div class="podium-medal">${medals[r]}</div><div class="podium-name">${esc(s.name)}</div><div class="podium-pts">${s.total} pts</div><div class="podium-bar">${r}</div></div>`;
+  }).join('')+'</div>';
+  const others=scores.slice(3);
+  if(others.length){
+    rest.innerHTML=others.map((s,i)=>`<div class="cierre-rest-row"><span class="pos">${i+4}</span><span class="nm">${esc(s.name)}</span><span class="pt">${s.total} pts</span></div>`).join('');
+  }
+}
+
+async function renderRanking(){
+  const list=document.getElementById('ranking-list');
+  list.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Cargando ranking...</div>';
+  const scores=await computeScores();
+  if(!scores.length){ list.innerHTML='<div style="color:var(--gray);text-align:center;padding:2rem">Aún no hay jugadores en el ranking</div>'; return; }
   list.innerHTML=scores.map((s,i)=>{
     const pos=i+1;const pc=pos===1?'top-1':pos===2?'top-2':pos===3?'top-3':'';
     const pi=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':'';
