@@ -440,6 +440,11 @@
   .cierre-kicker{font-family:'Oswald',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--gray);font-size:0.8rem;margin-top:0.6rem;}
   .cierre-title{font-family:'Oswald',sans-serif;font-size:2rem;color:var(--gold);margin:0.2rem 0 0.3rem;font-weight:700;}
   .cierre-sub{color:var(--gray);font-size:0.95rem;max-width:520px;margin:0.2rem auto 0;line-height:1.5;}
+  .champion-banner{display:inline-flex;align-items:center;gap:12px;margin:1.4rem auto 0;padding:10px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(240,192,64,0.16),rgba(240,192,64,0.05));border:1px solid var(--gold-dim);}
+  .champion-banner .flag{width:44px;height:auto;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+  .champion-text{text-align:left;}
+  .champion-label{font-family:'Oswald',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);font-size:0.68rem;}
+  .champion-name{font-family:'Oswald',sans-serif;font-size:1.25rem;font-weight:700;color:var(--gold);line-height:1.1;}
   /* Podio */
   .podium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:2rem auto 0.5rem;max-width:560px;}
   .podium-col{flex:1;display:flex;flex-direction:column;align-items:center;}
@@ -561,6 +566,13 @@
         <div class="cierre-kicker">Polla Mundialista · Madrina 2026</div>
         <h1 class="cierre-title">¡La polla llegó a su final!</h1>
         <p class="cierre-sub">El Mundial terminó y con él nuestra polla. Estos son los resultados definitivos. ¡Gracias a todos por jugar!</p>
+        <div class="champion-banner">
+          <img class="flag" src="https://flagcdn.com/h40/es.png" alt="España" onerror="this.style.display='none'">
+          <div class="champion-text">
+            <div class="champion-label">🏆 Campeón del Mundial 2026</div>
+            <div class="champion-name">España</div>
+          </div>
+        </div>
         <div id="cierre-podium"><div style="color:var(--gray);padding:2rem">Cargando resultados…</div></div>
         <div id="cierre-rest" class="cierre-rest"></div>
         <p class="cierre-thanks">Gracias por acompañarnos partido a partido. <b>¡Nos vemos en la próxima!</b> ⚽</p>
