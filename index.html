@@ -506,6 +506,15 @@
   .btn-primary:active,.save-btn:active,.cierre-btn:active,.nav-tab:active,.kdef-btn:active,.group-tab:active{transform:translateY(1px);}
   .cierre-btn:active{transform:translateY(0);}
 
+  /* Ranking: el podio se distingue de la tabla (sin tocar el JS) */
+  .rank-row:has(.rank-pos.top-1){background:linear-gradient(90deg,rgba(240,192,64,0.14),rgba(240,192,64,0.02));}
+  .rank-row:has(.rank-pos.top-1) .rank-name{color:#fff;font-weight:700;}
+  .rank-row:has(.rank-pos.top-2){background:linear-gradient(90deg,rgba(216,221,226,0.08),transparent);}
+  .rank-row:has(.rank-pos.top-3){background:linear-gradient(90deg,rgba(213,154,99,0.08),transparent);}
+
+  /* Reglas: medida de lectura cómoda (evita líneas de 100+ caracteres) */
+  .reglas-card p,.reglas-card li{max-width:68ch;}
+
   /* Selección de texto en la paleta de la marca */
   ::selection{background:rgba(240,192,64,0.32);color:#0a1f0e;}
 
